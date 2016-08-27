@@ -4,9 +4,9 @@ import isUndefined from 'lodash/isUndefined';
 import Impls from './impls';
 
 let impls = new Impls();
-impls.define('default', st => null);
+//impls.define('default', st => null);
 
-const mutation = (name, impl) => {
+const connecting = (name, impl) => {
   if (!isString(name)) {
     throw new TypeError(`${name} must be a string.`);
   }
@@ -17,4 +17,4 @@ const mutation = (name, impl) => {
   return impls.define(name, impl);
 };
 
-export default mutation;
+export default connecting;

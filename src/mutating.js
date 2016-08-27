@@ -4,9 +4,9 @@ import isUndefined from 'lodash/isUndefined';
 import Impls from './impls';
 
 let impls = new Impls();
-impls.define('default', st => null);
+impls.define('default', args => st => null);
 
-const selection = (name, impl) => {
+const mutating = (name, impl) => {
   if (!isString(name)) {
     throw new TypeError(`${name} must be a string.`);
   }
@@ -17,4 +17,4 @@ const selection = (name, impl) => {
   return impls.define(name, impl);
 };
 
-export default selection;
+export default mutating;

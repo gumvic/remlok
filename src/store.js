@@ -42,7 +42,7 @@ class Store {
     this.notifyScheduled = false;
     const subscribers = new Set(this.subscribers);
     for(const subscriber of subscribers) {
-      subscriber();
+      subscriber(this.curState);
     }
   }
 }

@@ -1,47 +1,27 @@
-import isString from 'lodash/isString';
+import isUndefined from 'lodash/isUndefined';
 import isFunction from 'lodash/isFunction';
-import _selection from './selection';
-import _mutation from './mutation';
-import _connection from './connection';
 
 class DB {
-  constructor(state) {
-    this.state = state;
+  constructor(data) {
+    this.curData = data;
     this.subscribers = new Set();
     this.notifyScheduled = false;
   }
-  selectLocal(selector) {
-    if (!selector) {
-      return () => null;
+  data(newData) {
+    const oldData = this.curData;
+    if (isUndefined(newData)) {
+      return this.curData;
     }
-    else if (isFunction(selected)) {
-      return () => selected(this.state);
-    }
-    else {
-      throw new TypeError(`${selector} must be either a falsey or a function.`);
-    }
-  }
-  select(selection, args) {
-    if (isString(selection)) {
-      selection = _selection(selection);
-    }
-    if (!isFunction(selection)) {
-      throw new TypeError(`${selection} must be a function.`);
-    }
-    const selector = selection(args);
-    if (isPlainObject(selector)) {
-      const localSelector = selected.$;
-      forEach(selector, (request, connection) => {
-        //connection = 
-      });
-      return this.selectLocal(localSelector);
+    else if (isFunction(newData)) {
+      this.curData = newData(this.curData);
     }
     else {
-      return this.selectLocal(selector);
+      this.curData = newData;
     }
-  }
-  mutate(selection, args) {
-
+    if (oldData !== this.curData) {
+      this.scheduleNotify();
+    }
+    return newData;
   }
   subscribe(subscriber) {
     if (!isFunction(subscriber)) {
@@ -53,14 +33,6 @@ class DB {
     };
     return unsubscribe;
   }
-  update(fun) {
-    const oldState = this.state;
-    const newState = fun(oldState);
-    if (oldState !== newState) {
-      this.state = newState;
-      this.scheduleNotify();
-    }
-  }
   scheduleNotify() {
     if (!this.notifyScheduled) {
       setImmediate(() => this.notify);
@@ -71,12 +43,12 @@ class DB {
     this.notifyScheduled = false;
     const subscribers = new Set(this.subscribers);
     for(const subscriber of subscribers) {
-      subscriber();
+      subscriber(this.curData);
     }
   }
 }
 
-const db = state =>
-  new DB(state);
+const db = data =>
+  new DB(data);
 
 export default db;
