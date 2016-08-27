@@ -1,8 +1,7 @@
 import isUndefined from 'lodash/isUndefined';
 
-class Defs {
-  constructor(defaultValue) {
-    this.defaultValue = defaultValue;
+class Impls {
+  constructor() {
     this.defs = {};
   }
   add(name, val) {
@@ -10,10 +9,7 @@ class Defs {
     return val;
   }
   get(name) {
-    if (!this.defs [name]) {
-      this.defs [name] = this.defaultValue;
-    }
-    return this.defs [name];
+    return this.defs [name] || this.defs.default;
   }
   define(name, fun) {
     if (!isUndefined(fun)) {
