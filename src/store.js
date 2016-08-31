@@ -1,5 +1,4 @@
 import isFunction from 'lodash/isFunction';
-import isPlainObject from 'lodash/isPlainObject';
 import conformsTo from 'lodash/conformsTo';
 import isNil from 'lodash/isNil';
 
@@ -31,7 +30,7 @@ class Store {
     }
     const parent = parent;
     // TODO when to unsubscribe?
-    const parentUnsubscribe = parent.subscribe(() => this.notify());
+    //const parentUnsubscribe = parent.subscribe(() => this.notify());
     this.parent = parent;
     const { select, dispatch, state } = opts;
     this.selector = select;
@@ -60,7 +59,8 @@ class Store {
     return () => selector(this.state, query);
   }
   select(query) {
-    const selector = this.selector(this.state, query);
+    const select = query => this.select(query);
+    const selector = this.selector(this.state, query, select);
     if (isNil(selector)) {
       return this.selectParent(query);
     }
@@ -129,16 +129,46 @@ class Store {
       }
     }
   }*/
+  /*subscribeParent(callback) {
+    return this.parent.subscribe(callback);
+  }
+  subscribeSelf(callback) {
+    this.subscribers.add(callback);
+    return () => {
+      this.subscribers.delete(callback);
+    };
+  }
+  subscribe(callback) {
+    const unsubscribeParent = this.subscribeParent(callback);
+    const unsubscribeSelf = this.subscribeSelf(callback);
+    return () => {
+      unsubscribeParent();
+      unsubscribeSelf();
+    };
+  }*/
   subscribe(callback) {
     this.subscribers.add(callback);
     return () => {
       this.subscribers.delete(callback);
     };
   }
+  destroy() {
+
+  }
   store(name) {
     // TODO
   }
 }
+
+/*class NS {
+  constructor(parent) {
+
+  }
+  select(query) {}
+  subscribe(callback) {
+    return this.parent.subscribe(callback);
+  }
+}*/
 
 const store = opts =>
   new Store(opts);
