@@ -13,13 +13,13 @@ const promiseShape = {
 
 const noParent = {
   select(query) {
-    // TODO throw
+    throw new Error(`No selector for ${query}`);
   }
   dispatch(msg) {
-    // TODO throw
+    throw new Error(`No dispatcher for ${dispatch}`);
   }
   subscribe(callback) {
-    // TODO nothing
+    return () => {};
   }
 };
 
@@ -29,12 +29,9 @@ class Store {
       throw new TypeError(`${opts} TODO`);
     }
     const parent = parent;
-    // TODO when to unsubscribe?
-    //const parentUnsubscribe = parent.subscribe(() => this.notify());
+    this.unsubscribeParent = parent.subscribe(() => this.notify());
     this.parent = parent;
-    const { select, dispatch, state } = opts;
-    this.selector = select;
-    this.dispatcher = dispatch;
+    this.opts = opts;
     this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
@@ -60,7 +57,7 @@ class Store {
   }
   select(query) {
     const select = query => this.select(query);
-    const selector = this.selector(this.state, query, select);
+    const selector = this.opts.selector(this.state, query, select);
     if (isNil(selector)) {
       return this.selectParent(query);
     }
@@ -87,7 +84,7 @@ class Store {
     }
   }
   dispatch(msg) {
-    const dispatcher = this.dispatcher(msg);
+    const dispatcher = this.opts.dispatcher(msg);
     if (isNil(dispatcher)) {
       return this.dispatchParent(msg);
     }
@@ -156,7 +153,9 @@ class Store {
 
   }
   store(name) {
-    // TODO
+    const spawner = this.opts.store;
+    const store = spawner(name);
+    return store;
   }
 }
 
