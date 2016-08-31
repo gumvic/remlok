@@ -2,6 +2,17 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import isNil from 'lodash/isNil';
 
+class Up {
+  constructor(value) {
+    this.value = value;
+  }
+  getValue() {
+    return this.value;
+  }
+}
+
+const up = v => new Up(v);
+
 const optsShape = {
   select: isFunction,
   dispatch: isFunction
@@ -51,7 +62,7 @@ class Store {
       this.notifyScheduled = true;
     }
   }
-  selectParent(query) {
+  /*selectParent(query) {
     return this.parent.select(query);
   }
   selectSelf(query, selector) {
@@ -106,6 +117,45 @@ class Store {
     else {
       return this.dispatchParent(msg);
     }
+  }*/
+  selectParent(query) {
+    return this.parent.select(query);
+  }
+  selectSelf(query, selector) {
+    return () => selector(this.state, query);
+  }
+  select(query) {
+    const selectorOrQuery = this.opts.select(
+      this.state,
+      query,
+      this.select);
+    if (isFunction(selectorOrQuery)) {
+      return this.selectSelf(query, selectorOrQuery);
+    }
+    else if (selectorOrQuery instanceof Up) {
+      return this.selectParent(selectorOrQuery.getValue());
+    }
+    else {
+      // TODO error
+    }
+  }
+  dispatch(msg) {
+    const dispatchingOrMsg = this.opts.dispatch(
+      msg,
+      this.dispatch);
+    if (isUndefined(dispatchingOrMsg)) {
+      return promise.resolve(true);
+    }
+    else if (isPromise(dispatchingOrMsg)) {
+      return dispatchingOrMsg.then(() => this.transform(msg));
+    }
+    else if (dispatchingOrMsg instanceof Up) {
+      return this.dispatchParent(dispatchingOrMsg.getValue());
+    }
+  }
+  transform(msg) {
+    const transformer = this.opts.transform;
+    this.setState(state => transformer(state, msg));
   }
   getState() {
     return this.state;
