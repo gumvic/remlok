@@ -11,7 +11,7 @@ const promiseShape = {
   then: isFunction
 };
 
-const noParent = {
+const rootStore = {
   select(query) {
     throw new Error(`No selector for ${query}`);
   }
@@ -24,7 +24,7 @@ const noParent = {
 };
 
 class Store {
-  constructor(opts, parent = noParent) {
+  constructor(opts, parent = rootStore) {
     if (!conformsTo(opts, optsShape)) {
       throw new TypeError(`${opts} TODO`);
     }
@@ -35,6 +35,8 @@ class Store {
     this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
+    this.select = this.select.bind(this);
+    this.dispatch = this.dispatch.bind(this);
   }
   notify() {
     this.notifyScheduled = false;
@@ -56,24 +58,31 @@ class Store {
     return () => selector(this.state, query);
   }
   select(query) {
-    const select = query => this.select(query);
-    const selector = this.opts.selector(this.state, query, select);
-    if (isNil(selector)) {
-      return this.selectParent(query);
+    if (isUndefined(query)) {
+      throw new TypeError(`${query} must not be undefined.`);
     }
-    else if (isFunction(selector)) {
-      return this.selectSelf(query, selector);
+    const selectorOrQuery = this.opts.selector(
+      this.state,
+      query,
+      this.select);
+    if (isUndefined(selectorOrQuery)) {
+      throw new TypeError(`No selector found for ${query}.`);
+    }
+    if (isFunction(selectorOrQuery)) {
+      return this.selectSelf(query, selectorOrQuery);
     }
     else {
-      throw new TypeError(`${selector} must be either a function or a null|undefined`);
+      return this.selectParent(query);
     }
   }
   dispatchParent(msg) {
     return this.parent.dispatch(msg);
   }
   dispatchSelf(msg, dispatcher) {
-    const dispatch = msg => this.dispatch(msg);
-    const dispatched = dispatcher(this.state, msg, dispatch);
+    const dispatched = dispatcher(
+      this.state,
+      msg,
+      this.dispatch);
     if (conformsTo(promiseShape, dispatched)) {
       return dispatched.then(() => true);
     }
@@ -84,15 +93,18 @@ class Store {
     }
   }
   dispatch(msg) {
-    const dispatcher = this.opts.dispatcher(msg);
-    if (isNil(dispatcher)) {
-      return this.dispatchParent(msg);
+    if (isUndefined(query)) {
+      throw new TypeError(`${msg} must not be undefined.`);
     }
-    else if (isFunction(dispatcher)) {
+    const dispatcherOrMsg = this.opts.dispatcher(msg);
+    if (isUndefined(dispatcherOrMsg)) {
+      throw new TypeError(`No dispatcher found for ${msg}.`);
+    }
+    if (isFunction(dispatcherOrMsg)) {
       return this.dispatchSelf(msg, dispatcher);
     }
     else {
-      throw new TypeError(`${dispatcher} must be either a function or a null|undefined.`);
+      return this.dispatchParent(msg);
     }
   }
   getState() {
