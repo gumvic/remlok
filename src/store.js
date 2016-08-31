@@ -1,10 +1,11 @@
 import isFunction from 'lodash/isFunction';
 import isPlainObject from 'lodash/isPlainObject';
 import conformsTo from 'lodash/conformsTo';
+import isNil from 'lodash/isNil';
 
 const optsShape = {
-  selector: isFunction,
-  dispatcher: isFunction
+  select: isFunction,
+  dispatch: isFunction
 };
 
 const promiseShape = {
@@ -33,8 +34,8 @@ class Store {
     const parentUnsubscribe = parent.subscribe(() => this.notify());
     this.parent = parent;
     const { select, dispatch, state } = opts;
-    this.selectf = select;
-    this.dispatchf = dispatch;
+    this.selector = select;
+    this.dispatcher = dispatch;
     this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
@@ -59,7 +60,7 @@ class Store {
     return () => selector(this.state, query);
   }
   select(query) {
-    const selector = this.selectf(this.state, query);
+    const selector = this.selector(this.state, query);
     if (isNil(selector)) {
       return this.selectParent(query);
     }
@@ -86,7 +87,7 @@ class Store {
     }
   }
   dispatch(msg) {
-    const dispatcher = this.dispatchf(msg);
+    const dispatcher = this.dispatcher(msg);
     if (isNil(dispatcher)) {
       return this.dispatchParent(msg);
     }
