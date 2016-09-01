@@ -2,17 +2,6 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import isNil from 'lodash/isNil';
 
-class Up {
-  constructor(value) {
-    this.value = value;
-  }
-  getValue() {
-    return this.value;
-  }
-}
-
-const up = v => new Up(v);
-
 const optsShape = {
   select: isFunction,
   dispatch: isFunction
@@ -24,10 +13,10 @@ const promiseShape = {
 
 const rootStore = {
   select(query) {
-    throw new Error(`No selector for ${query}`);
+    throw new Error(`No selector found for ${query}`);
   }
   dispatch(msg) {
-    throw new Error(`No dispatcher for ${dispatch}`);
+    throw new Error(`No dispatcher found for ${msg}`);
   }
   subscribe(callback) {
     return () => {};
@@ -46,8 +35,6 @@ class Store {
     this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
-    this.select = this.select.bind(this);
-    this.dispatch = this.dispatch.bind(this);
   }
   notify() {
     this.notifyScheduled = false;
@@ -62,108 +49,116 @@ class Store {
       this.notifyScheduled = true;
     }
   }
-  /*selectParent(query) {
-    return this.parent.select(query);
-  }
-  selectSelf(query, selector) {
-    return () => selector(this.state, query);
-  }
   select(query) {
-    if (isUndefined(query)) {
-      throw new TypeError(`${query} must not be undefined.`);
-    }
-    const selectorOrQuery = this.opts.selector(
-      this.state,
+    const select = query => this.select(query);
+    const selectParent = query => this.parent.select(query);
+    const selector = this.opts.select(
       query,
-      this.select);
-    if (isUndefined(selectorOrQuery)) {
-      throw new TypeError(`No selector found for ${query}.`);
-    }
-    if (isFunction(selectorOrQuery)) {
-      return this.selectSelf(query, selectorOrQuery);
+      select,
+      selectParent);
+    if (isFunction(selector)) {
+      return () => selector(this.state);
     }
     else {
-      return this.selectParent(query);
-    }
-  }
-  dispatchParent(msg) {
-    return this.parent.dispatch(msg);
-  }
-  dispatchSelf(msg, dispatcher) {
-    const dispatched = dispatcher(
-      this.state,
-      msg,
-      this.dispatch);
-    if (conformsTo(promiseShape, dispatched)) {
-      return dispatched.then(() => true);
-    }
-    else {
-      const state = dispatched;
-      this.setState(dispatched);
-      return promise.resolve(true);
+      throw new TypeError(`${selector} must be a selector.`)
     }
   }
   dispatch(msg) {
-    if (isUndefined(query)) {
-      throw new TypeError(`${msg} must not be undefined.`);
+    const dispatch = msg => this.dispatch(msg);
+    const dispatchParent = msg => this.parent.dispatch(msg);
+    const transformerOrSaga = this.opts.dispatch(
+      msg,
+      dispatch,
+      dispatchParent);
+    if (isFunction(transformerOrSaga)) {
+      const transformer = transformerOrSaga;
+      const state = transformer(this.state);
+      this.setState(state);
+      return promise.resolve(true);
     }
-    const dispatcherOrMsg = this.opts.dispatcher(msg);
-    if (isUndefined(dispatcherOrMsg)) {
-      throw new TypeError(`No dispatcher found for ${msg}.`);
-    }
-    if (isFunction(dispatcherOrMsg)) {
-      return this.dispatchSelf(msg, dispatcher);
+    else if (isPromise(transformerOrSaga)) {
+      const saga = transformerOrSaga;
+      return saga.then(true);
     }
     else {
-      return this.dispatchParent(msg);
+      throw new TypeError(`${transformerOrSaga} must be either a transformer a saga.`)
+    }
+  }
+  /*select(query) {
+    const select = query => this.select(query);
+    const selectParent = query => this.parent.select(query);
+    const dataOrSelector = this.opts.select(
+      this.state,
+      query,
+      select,
+      selectParent);
+    if (isFunction(dataOrSelector)) {
+      const selector = dataOrSelector;
+      return () => selector(this.state);
+    }
+    else {
+      const selector = st => this.opts.select(st, query);
+      return () => selector(this.state);
+    }
+  }
+  dispatch(msg) {
+    const stateOrSaga = this.opts.dispatch(
+      this.state,
+      msg,
+      dispatch,
+      dispatchParent);
+    if (isPromise(stateOrSaga)) {
+      const saga = stateOrSaga;
+      return saga.then(true);
+    }
+    else {
+      const state = stateOrSaga;
+      this.setState(state);
     }
   }*/
-  selectParent(query) {
-    return this.parent.select(query);
-  }
-  selectSelf(query, selector) {
-    return () => selector(this.state, query);
-  }
-  select(query) {
-    const selectorOrQuery = this.opts.select(
-      this.state,
-      query,
-      this.select);
-    if (isFunction(selectorOrQuery)) {
-      return this.selectSelf(query, selectorOrQuery);
-    }
-    else if (selectorOrQuery instanceof Up) {
-      return this.selectParent(selectorOrQuery.getValue());
-    }
-    else {
-      // TODO error
-    }
-  }
-  dispatch(msg) {
-    const dispatchingOrMsg = this.opts.dispatch(
+  /*dispatch(msg) {
+    const transformerOrSaga = this.opts.dispatch(
       msg,
-      this.dispatch);
-    if (isUndefined(dispatchingOrMsg)) {
+      dispatch,
+      dispatchParent);
+    if (isFunction(transformerOrSaga)) {
+      const transformer = transformerOrSaga;
+      this.setState(transformer(this.state));
       return promise.resolve(true);
     }
-    else if (isPromise(dispatchingOrMsg)) {
-      return dispatchingOrMsg.then(() => this.transform(msg));
+    else if (isPromise(transformerOrSaga)) {
+      const saga = transformerOrSaga;
+      return saga.then(true);
     }
-    else if (dispatchingOrMsg instanceof Up) {
-      return this.dispatchParent(dispatchingOrMsg.getValue());
+    else {
+      throw new TypeError(`No saga or transformer found for ${msg}`);
     }
-  }
-  transform(msg) {
-    const transformer = this.opts.transform;
-    this.setState(state => transformer(state, msg));
-  }
+  }*/
+  /*dispatch(msg) {
+    const dispatch = msg => this.dispatch(msg);
+    const dispatchParent = msg => this.parent.dispatch(msg);
+    const dispatching = this.opts.dispatch(
+      msg,
+      dispatch,
+      dispatchParent);
+    if (isUndefined(dispatching)) {
+      return promise.resolve(true);
+    }
+    else if (isPromise(dispatching)) {
+
+    }
+    else {
+      throw new TypeError(`No dispatcher found for ${msg}`);
+    }
+  }*/
+  /*transform(msg) {
+    const state = this.opts.transform(this.state, msg);
+    this.setState(state);
+  }*/
   getState() {
     return this.state;
   }
   setState(state) {
-    if (isFunction(state)) {
-      state = state(this.state);
-    }
     if (this.state !== state) {
       this.state = state;
       this.scheduleNotify();
