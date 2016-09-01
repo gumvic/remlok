@@ -1,6 +1,6 @@
 import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
-import isNil from 'lodash/isNil';
+import promise from 'bluebird';
 
 const optsShape = {
   select: isFunction,
@@ -10,6 +10,9 @@ const optsShape = {
 const promiseShape = {
   then: isFunction
 };
+
+const isPromise = x =>
+  conformsTo(x, promiseShape);
 
 const rootStore = {
   select(query) {
@@ -73,7 +76,7 @@ class Store {
     if (isFunction(transformerOrSaga)) {
       const transformer = transformerOrSaga;
       const state = transformer(this.state);
-      this.setState(state);
+      this.setState(transformer(this.state));
       return promise.resolve(true);
     }
     else if (isPromise(transformerOrSaga)) {
