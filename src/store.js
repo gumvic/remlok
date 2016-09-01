@@ -31,8 +31,13 @@ class Store {
     if (!conformsTo(opts, optsShape)) {
       throw new TypeError(`${opts} TODO`);
     }
-    const parent = parent;
-    this.unsubscribeParent = parent.subscribe(() => this.notify());
+    this.notify = this.notify.bind(this);
+    this.select = this.select.bind(this);
+    this.dispatch = this.dispatch.bind(this);
+    this.parentSelect = parent.select.bind(parent);
+    this.parentDispatch = parent.dispatch.bind(parent);
+    this.parentSubscribe = parent.subscribe.bind(parent);
+    this.parentUnsubscribe = parent.unsubscribe.bind(parent);
     this.parent = parent;
     this.opts = opts;
     this.state = state;
@@ -53,12 +58,10 @@ class Store {
     }
   }
   select(query) {
-    const select = query => this.select(query);
-    const selectParent = query => this.parent.select(query);
     const selector = this.opts.select(
       query,
-      select,
-      selectParent);
+      this.select,
+      this.selectParent);
     if (isFunction(selector)) {
       return () => selector(this.state);
     }
@@ -67,12 +70,10 @@ class Store {
     }
   }
   dispatch(msg) {
-    const dispatch = msg => this.dispatch(msg);
-    const dispatchParent = msg => this.parent.dispatch(msg);
     const transformerOrSaga = this.opts.dispatch(
       msg,
-      dispatch,
-      dispatchParent);
+      this.dispatch,
+      this.dispatchParent);
     if (isFunction(transformerOrSaga)) {
       const transformer = transformerOrSaga;
       const state = transformer(this.state);
@@ -84,7 +85,7 @@ class Store {
       return saga.then(true);
     }
     else {
-      throw new TypeError(`${transformerOrSaga} must be either a transformer a saga.`)
+      throw new TypeError(`${transformerOrSaga} must be either a transformer or a saga.`)
     }
   }
   getState() {
@@ -98,13 +99,17 @@ class Store {
     return this;
   }
   subscribe(callback) {
+    if (!this.subscribers.size) {
+      this.parentSubscribe(this.notify);
+    }
     this.subscribers.add(callback);
-    return () => {
-      this.subscribers.delete(callback);
-    };
+    return () => this.unsubscribe(callback);
   }
-  destroy() {
-
+  unsubscribe(callback) {
+    this.subscribers.delete(callback);
+    if (!this.subscribers.size) {
+      this.parentUnsubscribe(this.notify);
+    }
   }
   store(name) {
     const spawner = this.opts.store;
