@@ -2,7 +2,7 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import promise from 'bluebird';
 
-const optsShape = {
+const implShape = {
   select: isFunction,
   dispatch: isFunction
 };
@@ -27,20 +27,22 @@ const rootStore = {
 };
 
 class Store {
-  constructor(opts, parent = rootStore) {
-    if (!conformsTo(opts, optsShape)) {
-      throw new TypeError(`${opts} TODO`);
+  constructor(impl, parent = rootStore) {
+    if (!conformsTo(impl, implShape)) {
+      throw new TypeError(`${impl} TODO`);
     }
+    this.impl = impl;
+    this.parent = {
+      select: parent.select.bind(parent),
+      dispatch: parent.dispatch.bind(parent),
+      subscribe: parent.subscribe,
+      unsubscribe: parent.unsubscribe
+    };
     this.notify = this.notify.bind(this);
     this.select = this.select.bind(this);
     this.dispatch = this.dispatch.bind(this);
-    this.parentSelect = parent.select.bind(parent);
-    this.parentDispatch = parent.dispatch.bind(parent);
-    this.parentSubscribe = parent.subscribe.bind(parent);
-    this.parentUnsubscribe = parent.unsubscribe.bind(parent);
-    this.parent = parent;
-    this.opts = opts;
-    this.state = state;
+    // TODO
+    //this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
   }
@@ -58,10 +60,10 @@ class Store {
     }
   }
   select(query) {
-    const selector = this.opts.select(
+    const selector = this.impl.select(
       query,
       this.select,
-      this.selectParent);
+      this.parent.select);
     if (isFunction(selector)) {
       return () => selector(this.state);
     }
@@ -70,10 +72,10 @@ class Store {
     }
   }
   dispatch(msg) {
-    const transformerOrSaga = this.opts.dispatch(
+    const transformerOrSaga = this.impl.dispatch(
       msg,
       this.dispatch,
-      this.dispatchParent);
+      this.parent.dispatch);
     if (isFunction(transformerOrSaga)) {
       const transformer = transformerOrSaga;
       const state = transformer(this.state);
@@ -100,7 +102,7 @@ class Store {
   }
   subscribe(callback) {
     if (!this.subscribers.size) {
-      this.parentSubscribe(this.notify);
+      this.parent.subscribe(this.notify);
     }
     this.subscribers.add(callback);
     return () => this.unsubscribe(callback);
@@ -108,17 +110,17 @@ class Store {
   unsubscribe(callback) {
     this.subscribers.delete(callback);
     if (!this.subscribers.size) {
-      this.parentUnsubscribe(this.notify);
+      this.parent.unsubscribe(this.notify);
     }
   }
   store(name) {
-    const spawner = this.opts.store;
+    const spawner = this.impl.store;
     const store = spawner(name);
     return store;
   }
 }
 
-const store = opts =>
-  new Store(opts);
+const store = impl =>
+  new Store(impl);
 
 export default store;
