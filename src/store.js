@@ -2,7 +2,7 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import promise from 'bluebird';
 
-const implShape = {
+const optsShape = {
   select: isFunction,
   dispatch: isFunction
 };
@@ -27,22 +27,32 @@ const rootStore = {
 };
 
 class Store {
-  constructor(impl, parent = rootStore) {
-    if (!conformsTo(impl, implShape)) {
-      throw new TypeError(`${impl} TODO`);
+  constructor(opts, parent = rootStore) {
+    if (!conformsTo(opts, optsShape)) {
+      throw new TypeError(`${opts} TODO`);
     }
-    this.impl = impl;
+    this.initOpts(opts);
+    this.initParent(parent);
+    this.initMisc();
+  }
+  initParent(parent) {
+    const { select, dispatch, subscribe, unsubscribe } = parent;
     this.parent = {
-      select: parent.select.bind(parent),
-      dispatch: parent.dispatch.bind(parent),
-      subscribe: parent.subscribe,
-      unsubscribe: parent.unsubscribe
+      select: select.bind(parent),
+      dispatch: dispatch.bind(parent),
+      subscribe,
+      unsubscribe
     };
+  }
+  initOpts(opts) {
+    const { select, dispatch, state } = opts;
+    this.impl = { select, dispatch };
+    this.state = state;
+  }
+  initMisc() {
     this.notify = this.notify.bind(this);
     this.select = this.select.bind(this);
     this.dispatch = this.dispatch.bind(this);
-    // TODO
-    //this.state = state;
     this.subscribers = new Set();
     this.notifyScheduled = false;
   }
