@@ -30,7 +30,15 @@ const select = (query, select, selectParent) => {
 const dispatch = (msg, select, dispatchParent) => {
   const { id } = msg;
   const props = omit(msg, ['id']);
-  return st => update(users, [id], user => assign({}, user, props));
+  return users => {
+    if (users [id]) {
+      const user = assign({}, users [id], props);
+      return assign({}, users, { [id]: user });
+    }
+    else {
+      return users;
+    }
+  };
 };
 
 const usersStore = () => {

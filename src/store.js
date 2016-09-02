@@ -2,6 +2,7 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import pick from 'lodash/pick';
 import promise from 'bluebird';
+import _setimmediate_ from 'setimmediate';
 
 const promiseShape = {
   then: isFunction
@@ -93,7 +94,7 @@ class Store {
   }
   scheduleNotify() {
     if (!this.notifyScheduled) {
-      setImmediate(() => this.notify());
+      setImmediate(this.notify);
       this.notifyScheduled = true;
     }
   }
