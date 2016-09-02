@@ -98,30 +98,28 @@ class Store {
       query,
       this.select,
       this.parent.select);
-    if (isFunction(selector)) {
-      return () => selector(this.state);
-    }
-    else {
+    if (!isFunction(selector)) {
       throw new TypeError(`${selector} must be a selector.`)
     }
+    return () => selector(this.state);
   }
   dispatch(msg) {
-    const transformerOrSaga = this.impl.dispatch(
+    const dispatcher = this.impl.dispatch(
       msg,
       this.dispatch,
       this.parent.dispatch);
-    if (isFunction(transformerOrSaga)) {
-      const transformer = transformerOrSaga;
-      const state = transformer(this.state);
-      this.setState(transformer(this.state));
-      return promise.resolve(true);
+    if (!isFunction(dispatcher)) {
+      throw new TypeError(`${dispatcher} must be a selector.`)
     }
-    else if (isPromise(transformerOrSaga)) {
-      const saga = transformerOrSaga;
+    const stateOrSaga = dispatcher(this.state);
+    if (isPromise(stateOrSaga)) {
+      const saga = stateOrSaga;
       return saga.then(true);
     }
     else {
-      throw new TypeError(`${transformerOrSaga} must be either a transformer or a saga.`)
+      const state = stateOrSaga;
+      this.setState(state);
+      return promise.resolve(true);
     }
   }
   getState() {
