@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import assign from 'lodash/assign';
 import omit from 'lodash/omit';
 import update from 'lodash/update';
-import { store } from '~/index';
+import { store } from '../src/index';
 
 const users = {
   'bob': {

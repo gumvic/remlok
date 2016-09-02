@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import usersStore from '~/fixture/usersStore';
+import usersStore from '../fixture/usersStore';
 
 describe('Store', () => {
   describe('selects', () => {
@@ -9,10 +9,10 @@ describe('Store', () => {
     it('a user', function() {
       const selector = this.$store.select('alice');
       const user = selector();
-      expect(user).to.deepEqual({
+      expect(user).to.deep.equal({
         id: 'alice',
         name: 'Alice',
-        age: 42
+        age: 25
       });
     });
   });

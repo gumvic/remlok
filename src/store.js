@@ -1,5 +1,6 @@
 import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
+import pick from 'lodash/pick';
 import promise from 'bluebird';
 
 const promiseShape = {
@@ -29,12 +30,15 @@ const storeShape = {
 const rootStore = {
   select(query) {
     throw new Error(`No selector found for ${query}`);
-  }
+  },
   dispatch(msg) {
     throw new Error(`No dispatcher found for ${msg}`);
-  }
+  },
   subscribe(callback) {
     return () => {};
+  },
+  unsubscribe(callback) {
+
   }
 };
 
