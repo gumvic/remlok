@@ -11,8 +11,7 @@ const isPromise = x =>
 
 const implShape = {
   select: isFunction,
-  dispatch: isFunction,
-  spawn: isFunction
+  dispatch: isFunction
 };
 
 const nsShape = {
@@ -52,10 +51,20 @@ class Store {
     this.initMethods();
     this.initMisc();
   }
-  initOpts(opts) {
-    const { select, dispatch, state } = opts;
-    this.impl = { select, dispatch };
+  initImpl(opts) {
+    const impl = pick(opts, ['select', 'dispatch']);
+    if (!conformsTo(impl, implShape)) {
+      throw new TypeError(`${impl} TODO`);
+    }
+    this.impl = impl;
+  }
+  initState(opts) {
+    const { state } = opts;
     this.state = state;
+  }
+  initOpts(opts) {
+    this.initImpl(opts);
+    this.initState(opts);
   }
   initParent(parent) {
     this.parent = parent;
@@ -138,25 +147,23 @@ class Store {
       this.parent.unsubscribe(this.notify);
     }
   }
-  spawn(name) {
-    const spawner = this.impl.spawn;
-    const { ns, opts } = spawner(name);
-    if (!conformsTo(ns, nsShape)) {
-      throw new TypeError(`${ns} TODO`);
-    }
-    if (!conformsTo(opts, implShape)) {
-      throw new TypeError(`${opts} TODO`);
-    }
-    const { select: wrapQuery, dispatch: wrapMsq } = ns;
-    const parent = {
-      select: query => this.select(wrapQuery(query)),
-      dispatch: msg => this.dispatch(wrapMsg(msg)),
-      subscribe: this.subscribe,
-      unsubscribe: this.unsubscribe
-    };
-    return new Store(opts, parent);
-  }
 }
+
+const ns = (store, ns) => {
+  const {
+    select = x => x,
+    dispatch = x => x
+  } = ns;
+  if (!conformsTo(ns, nsShape)) {
+    throw new TypeError(`${ns} TODO`);
+  }
+  return {
+    select: query => store.select(select(query)),
+    dispatch: msg => store.dispatch(dispatch(msg)),
+    unsubscribe: store.unsubscribe,
+    subscribe: store.subscribe
+  };
+};
 
 const store = opts =>
   new Store(opts);
