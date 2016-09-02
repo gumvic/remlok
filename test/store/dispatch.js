@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import usersStore from '../../fixture/store/users';
+import store from '../../fixture/store/users';
 
 describe('Store', () => {
   beforeEach(function() {
-    this.$store = usersStore();
+    this.$store = store();
   });
   describe('dispatch', () => {
     it('updates state immediately', function() {

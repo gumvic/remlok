@@ -1,7 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
 import assign from 'lodash/assign';
-import omit from 'lodash/omit';
-import update from 'lodash/update';
 import { store } from '../../src/index';
 
 const data = {
@@ -23,13 +21,17 @@ const data = {
 };
 
 const select = (query, select, selectParent) => {
-  const id = query;
-  return users => users [id];
+  switch(query) {
+    case '$items':
+    return users => users;
+    default:
+    return users => users [query];
+  }
 };
 
-const dispatch = (msg, select, dispatchParent) => {
+const dispatch = (msg, dispatch, dispatchParent) => {
   const { id } = msg;
-  const props = omit(msg, ['id']);
+  const props = msg;
   return users => {
     if (users [id]) {
       const user = assign({}, users [id], props);

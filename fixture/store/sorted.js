@@ -3,12 +3,12 @@ import { store } from '../../src/index';
 
 const select = (query, select, selectParent) => {
   const by = query;
-  const items = selectParent('items');
+  const items = selectParent('$items');
   return _ => sortBy(items(), by);
 };
 
 const dispatch = (msg, select, dispatchParent) => {
-
+  
 };
 
 const sorted = () => {
