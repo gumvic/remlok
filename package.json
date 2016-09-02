@@ -8,9 +8,9 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "test-store": "mocha --recursive --compilers js:babel-core/register test/store.js",
+    "test-store": "mocha --recursive --compilers js:babel-core/register test/store",
     "test": "mocha --recursive --compilers js:babel-core/register",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --colors --reporter dot test/"
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --colors --reporter dot test"
   },
   "author": "",
   "license": "ISC",
