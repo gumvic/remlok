@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import usersStore from '../../fixture/usersStore';
+import usersStore from '../../fixture/store/users';
 
 describe('Store', () => {
   beforeEach(function() {

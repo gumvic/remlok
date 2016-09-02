@@ -2,9 +2,9 @@ import cloneDeep from 'lodash/cloneDeep';
 import assign from 'lodash/assign';
 import omit from 'lodash/omit';
 import update from 'lodash/update';
-import { store } from '../src/index';
+import { store } from '../../src/index';
 
-const users = {
+const data = {
   'bob': {
     id: 'bob',
     name: 'Bob',
@@ -41,9 +41,9 @@ const dispatch = (msg, select, dispatchParent) => {
   };
 };
 
-const usersStore = () => {
-  const state = cloneDeep(users);
+const users = () => {
+  const state = cloneDeep(data);
   return store({ select, dispatch, state });
 };
 
-export default usersStore;
+export default users;
