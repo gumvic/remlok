@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "test-ql": "mocha --recursive --compilers js:babel-core/register test/ql",
+    "test-store": "mocha --recursive --compilers js:babel-core/register test/store.js",
     "test": "mocha --recursive --compilers js:babel-core/register",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --colors --reporter dot test/"
   },

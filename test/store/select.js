@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+/*import { expect } from 'chai';
 import usersStore from '~/fixture/usersStore';
 
 describe('Store', () => {
@@ -16,4 +16,4 @@ describe('Store', () => {
       });
     });
   });
-});
+});*/
