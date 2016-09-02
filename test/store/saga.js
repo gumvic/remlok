@@ -14,7 +14,7 @@ describe('Store', () => {
       store.subscribe(callback);
       this.$callback = callback;
     });
-    it('optimistically updates and then patches with remote data', function() {
+    it('optimistically updates and patches with remote data', function() {
       const store = this.$store;
       const callback = this.$callback;
       const user = {
@@ -24,7 +24,44 @@ describe('Store', () => {
       return store.dispatch(['add', user])
         .delay(10)
         .then(() => {
-          expect(callback.returnValues).to.deep.equal([]);
+          expect(callback.returnValues).to.deep.equal([
+            [
+              {
+                id: 'tmp',
+                name: 'Alice',
+                age: 25
+              }
+            ],
+            [
+              {
+                id: 'alice',
+                name: 'Alice',
+                age: 25
+              }
+            ]
+          ]);
+        });
+    });
+    it('optimistically updates and reverts because of remote rejection', function() {
+      const store = this.$store;
+      const callback = this.$callback;
+      const user = {
+        name: 'Jill Pole',
+        age: 14
+      };
+      return store.dispatch(['add', user])
+        .delay(10)
+        .then(() => {
+          expect(callback.returnValues).to.deep.equal([
+            [
+              {
+                id: 'tmp',
+                name: 'Jill Pole',
+                age: 14
+              }
+            ],
+            []
+          ]);
         });
     });
   });

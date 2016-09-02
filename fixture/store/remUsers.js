@@ -9,14 +9,14 @@ const remote = msg => {
   const [action, payload] = msg;
   switch(action) {
     case 'add':
-    return payload.id === 13 ?
+    return payload.age <= 21 ?
       promise
-        .delay(10)
-        .reject() :
+        .reject()
+        .delay(10):
       promise
-        .delay(10)
         .resolve(
-          assign({}, payload, { id: lowerCase(payload.name) }));
+          assign({}, payload, { id: lowerCase(payload.name) }))
+        .delay(10);
   }
 };
 
@@ -30,17 +30,19 @@ const dispatch = (msg, dispatch, dispatchParent) => {
     case 'add':
     return users => promise.coroutine(function*() {
       const tmpID = 'tmp';
-      const user = assign({ id: tmpID }, payload);
-      yield dispatch(['_add', user]);
+      const tmpUser = assign(payload, { id: tmpID });
+      yield dispatch(['_add', tmpUser]);
       try {
-        const user = yield remote(['add', user]);
-        yield dispatch(['_del', tmpID]);
-        yield dispatch(['_add', user]);
+        const user = yield remote(['add', tmpUser]);
+        const patch = [
+          dispatch(['_del', tmpID]),
+          dispatch(['_add', user])];
+        yield promise.all(patch);
       }
-      catch(_) {
+      catch(e) {
         yield dispatch(['_del', tmpID]);
       }
-    });
+    })();
     case '_add':
     return users => assign({}, users, { [payload.id]: payload });
     case '_del':
