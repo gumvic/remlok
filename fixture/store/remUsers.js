@@ -1,27 +1,9 @@
-import cloneDeep from 'lodash/cloneDeep';
 import assign from 'lodash/assign';
 import omit from 'lodash/omit';
 import lowerCase from 'lodash/lowerCase';
+import toArray from 'lodash/toArray';
 import promise from 'bluebird';
 import { store } from '../../src/index';
-
-const data = {
-  'bob': {
-    id: 'bob',
-    name: 'Bob',
-    age: 29
-  },
-  'alice': {
-    id: 'alice',
-    name: 'Alice',
-    age: 25
-  },
-  'roger': {
-    id: 'roger',
-    name: 'Roger',
-    age: 31
-  }
-};
 
 const remote = msg => {
   const [action, payload] = msg;
@@ -39,8 +21,7 @@ const remote = msg => {
 };
 
 const select = (query, select, selectParent) => {
-  const id = query;
-  return items => items [id];
+  return users => toArray(users);
 };
 
 const dispatch = (msg, dispatch, dispatchParent) => {
@@ -50,27 +31,25 @@ const dispatch = (msg, dispatch, dispatchParent) => {
     return users => promise.coroutine(function*() {
       const tmpID = 'tmp';
       const user = assign({ id: tmpID }, payload);
-      yield dispatch(['addO', user]);
+      yield dispatch(['_add', user]);
       try {
         const user = yield remote(['add', user]);
-        yield dispatch(['del', tmpID]);
-        yield dispatch(['addOptimistically', user]);
+        yield dispatch(['_del', tmpID]);
+        yield dispatch(['_add', user]);
       }
       catch(_) {
-        yield dispatch(['del', tmpID]);
+        yield dispatch(['_del', tmpID]);
       }
     });
-    case 'init':
-    return users => payload;
-    case 'addOptimistically':
+    case '_add':
     return users => assign({}, users, { [payload.id]: payload });
-    case 'del':
+    case '_del':
     return users => omit(users, [payload]);
   }
 };
 
 const users = () => {
-  const state = cloneDeep(data);
+  const state = {};
   return store({ select, dispatch, state });
 };
 

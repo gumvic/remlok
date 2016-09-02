@@ -8,16 +8,18 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "test-store": "mocha --recursive --compilers js:babel-core/register test/store",
-    "test": "mocha --recursive --compilers js:babel-core/register",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --colors --reporter dot test"
+    "test-store": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store",
+    "test": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --require babel-polyfill --colors --reporter dot test"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.10.1",
     "babel-core": "^6.10.4",
+    "babel-polyfill": "^6.13.0",
     "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-0": "^6.5.0",
     "chai": "^3.5.0",
     "istanbul": "^1.0.0-alpha.2",
     "mocha": "^2.5.3",
