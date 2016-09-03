@@ -6,16 +6,17 @@ import promise from 'bluebird';
 import { store } from '../../src/index';
 
 const remote = msg => {
-  const [action, payload] = msg;
+  const [action, args] = msg;
   switch(action) {
     case 'add':
-    return payload.age <= 21 ?
+    const user = args;
+    return user.age <= 21 ?
       promise
         .reject()
         .delay(10):
       promise
         .resolve(
-          assign({}, payload, { id: lowerCase(payload.name) }))
+          assign({}, user, { id: lowerCase(user.name) }))
         .delay(10);
   }
 };
@@ -25,12 +26,14 @@ const select = (query, select, selectParent) => {
 };
 
 const dispatch = (msg, dispatch, dispatchParent) => {
-  const [action, payload] = msg;
+  const [action, args] = msg;
+  let user = null;
   switch(action) {
     case 'add':
+    user = args;
     return users => promise.coroutine(function*() {
       const tmpID = 'tmp';
-      const tmpUser = assign(payload, { id: tmpID });
+      const tmpUser = assign(user, { id: tmpID });
       yield dispatch(['_add', tmpUser]);
       try {
         const user = yield remote(['add', tmpUser]);
@@ -44,9 +47,11 @@ const dispatch = (msg, dispatch, dispatchParent) => {
       }
     })();
     case '_add':
-    return users => assign({}, users, { [payload.id]: payload });
+    user = args;
+    return users => assign({}, users, { [user.id]: user });
     case '_del':
-    return users => omit(users, [payload]);
+    const id = args;
+    return users => omit(users, [id]);
   }
 };
 
