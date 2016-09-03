@@ -1,5 +1,6 @@
 import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
+import isPlainObject from 'lodash/isPlainObject';
 import pick from 'lodash/pick';
 import promise from 'bluebird';
 import _setimmediate_ from 'setimmediate';
@@ -11,10 +12,15 @@ const promiseShape = {
 const isPromise = x =>
   conformsTo(x, promiseShape);
 
+const isOpts = isPlainObject;
+
 const implShape = {
   select: isFunction,
   dispatch: isFunction
 };
+
+const isImpl = x =>
+  conformsTo(implShape);
 
 const nsShape = {
   select: isFunction,
@@ -27,6 +33,9 @@ const storeShape = {
   subscribe: isFunction,
   unsubscribe: isFunction
 };
+
+const isStore = x =>
+  conformsTo(storeShape);
 
 const rootStore = {
   select(query) {
@@ -45,20 +54,14 @@ const rootStore = {
 
 class Store {
   constructor(opts, parent = rootStore) {
-    if (!conformsTo(opts, implShape)) {
-      throw new TypeError(`${opts} TODO`);
-    }
-    if (!conformsTo(parent, storeShape)) {
-      throw new TypeError(`${parent} TODO`);
-    }
     this.initOpts(opts);
     this.initParent(parent);
     this.initMethods();
-    this.initMisc();
+    this.initProps();
   }
   initImpl(opts) {
     const impl = pick(opts, ['select', 'dispatch']);
-    if (!conformsTo(impl, implShape)) {
+    if (!isImpl(impl)) {
       throw new TypeError(`${impl} TODO`);
     }
     this.impl = impl;
@@ -68,10 +71,16 @@ class Store {
     this.state = state;
   }
   initOpts(opts) {
+    if (!isOpts(opts)) {
+      throw new TypeError(`${opts} TODO`);
+    }
     this.initImpl(opts);
     this.initState(opts);
   }
   initParent(parent) {
+    if (!isStore(parent)) {
+      throw new TypeError(`${parent} TODO`);
+    }
     this.parent = parent;
   }
   initMethods() {
@@ -81,7 +90,7 @@ class Store {
     this.subscribe = this.subscribe.bind(this);
     this.unsubscribe = this.unsubscribe.bind(this);
   }
-  initMisc() {
+  initProps() {
     this.subscribers = new Set();
     this.notifyScheduled = false;
   }

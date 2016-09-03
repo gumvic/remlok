@@ -6,7 +6,8 @@ describe('Store', () => {
     before(function() {
       const opts = {
         select: q => st => null,
-        dispatch: m => st => st
+        dispatch: m => st => st,
+        state: {}
       };
       this.$opts = opts;
       this.$badOpts = {
