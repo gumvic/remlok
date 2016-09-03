@@ -7,7 +7,7 @@ describe('Store', () => {
     this.$store = store();
   });
   describe('selects', () => {
-    it('something', function() {
+    it('data', function() {
       const store = this.$store;
       const selector = store.select('bob');
       const data = selector();

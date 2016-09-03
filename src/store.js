@@ -123,7 +123,7 @@ class Store {
       this.dispatch,
       this.parent.dispatch);
     if (!isFunction(dispatcher)) {
-      throw new TypeError(`${dispatcher} must be a selector.`)
+      throw new TypeError(`${dispatcher} must be a dispatcher.`)
     }
     const stateOrSaga = dispatcher(this.state);
     if (isPromise(stateOrSaga)) {
@@ -177,7 +177,7 @@ class Store {
   };
 };*/
 
-const store = opts =>
-  new Store(opts);
+const store = (opts, parent) =>
+  new Store(opts, parent);
 
 export default store;

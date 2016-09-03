@@ -14,7 +14,7 @@
     "test-store-dispatch": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/dispatch.js",
     "test-store-subscribe": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/subscribe.js",
     "test-store-saga": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/saga.js",
-    "test-store-fractal": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/fractal.js",
+    "test-store-child": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/child.js",
     "test": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --require babel-polyfill --colors --reporter dot test"
   },

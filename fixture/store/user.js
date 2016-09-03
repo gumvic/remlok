@@ -12,14 +12,12 @@ const dispatch = (msg, select, dispatchParent) => {
     return _ => id;
     case 'update':
     const user = args;
-    return dispatchParent(user);
-    default:
-    return st => st;
+    return _ => dispatchParent(user);
   }
 };
 
-const user = () => {
-  return store({ select, dispatch });
+const user = (parent) => {
+  return store({ select, dispatch }, parent);
 };
 
 export default user;
