@@ -9,6 +9,12 @@
   "scripts": {
     "build": "babel src --out-dir lib",
     "test-store": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store",
+    "test-store-create": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/create.js",
+    "test-store-select": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/select.js",
+    "test-store-dispatch": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/dispatch.js",
+    "test-store-subscribe": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/subscribe.js",
+    "test-store-saga": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/saga.js",
+    "test-store-fractal": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill test/store/fractal.js",
     "test": "mocha --recursive --compilers js:babel-core/register --require babel-polyfill",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --recursive --compilers js:babel-core/register --require babel-polyfill --colors --reporter dot test"
   },

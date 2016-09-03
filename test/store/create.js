@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import store from '../../fixture/store/users';
+import { store } from '../../src/index';
 
 describe('Store', () => {
   describe('created when', () => {
