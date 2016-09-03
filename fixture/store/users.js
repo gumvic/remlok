@@ -21,12 +21,8 @@ const data = {
 };
 
 const select = (query, select, selectParent) => {
-  switch(query) {
-    case '$items':
-    return users => users;
-    default:
-    return users => users [query];
-  }
+  const id = query;
+  return users => users [id];
 };
 
 const dispatch = (msg, dispatch, dispatchParent) => {

@@ -152,7 +152,7 @@ class Store {
   }
 }
 
-const ns = (store, ns) => {
+/*const ns = (store, ns) => {
   const {
     select = x => x,
     dispatch = x => x
@@ -166,7 +166,7 @@ const ns = (store, ns) => {
     unsubscribe: store.unsubscribe,
     subscribe: store.subscribe
   };
-};
+};*/
 
 const store = opts =>
   new Store(opts);

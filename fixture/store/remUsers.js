@@ -34,10 +34,10 @@ const dispatch = (msg, dispatch, dispatchParent) => {
       yield dispatch(['_add', tmpUser]);
       try {
         const user = yield remote(['add', tmpUser]);
-        const patch = [
+        const patch = promise.all([
           dispatch(['_del', tmpID]),
-          dispatch(['_add', user])];
-        yield promise.all(patch);
+          dispatch(['_add', user])]);
+        yield patch;
       }
       catch(e) {
         yield dispatch(['_del', tmpID]);
