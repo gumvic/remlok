@@ -1,6 +1,6 @@
 # Ditch `unsubscribe`?
 
-# Subscribe must also have `query` arg.
+# Subscribe must also have `query` arg (good to use in saga test).
 
 # NS.
 
