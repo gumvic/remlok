@@ -31,7 +31,7 @@ const dispatch = (msg, dispatch, dispatchParent) => {
   switch(action) {
     case 'add':
     user = args;
-    return users => promise.coroutine(function*() {
+    return promise.coroutine(function*(users) {
       const tmpID = 'tmp';
       const tmpUser = assign(user, { id: tmpID });
       yield dispatch(['_add', tmpUser]);
@@ -45,7 +45,7 @@ const dispatch = (msg, dispatch, dispatchParent) => {
       catch(e) {
         yield dispatch(['_del', tmpID]);
       }
-    })();
+    });
     case '_add':
     user = args;
     return users => assign({}, users, { [user.id]: user });
