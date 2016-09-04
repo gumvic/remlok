@@ -16,7 +16,7 @@ const remote = msg => {
         .delay(10):
       promise
         .resolve(
-          assign({}, user, { id: lowerCase(user.name) }))
+          { ...user, id: lowerCase(user.name) })
         .delay(10);
   }
 };
@@ -50,7 +50,7 @@ const dispatch = (msg, dispatch, dispatchParent) => {
     });
     case '_add':
     user = args;
-    return users => assign({}, users, { [user.id]: user });
+    return users => ({ ...users, [user.id]: user });
     case '_del':
     const id = args;
     return users => omit(users, [id]);

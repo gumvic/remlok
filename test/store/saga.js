@@ -9,8 +9,6 @@ describe('Store', () => {
   describe('saga', () => {
     beforeEach(function() {
       const store = this.$store;
-      //const selector = store.select('users');
-      //const callback = sinon.spy(() => selector());
       const callback = sinon.spy();
       store.subscribe('users', callback);
       this.$callback = callback;

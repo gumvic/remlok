@@ -30,8 +30,13 @@ const dispatch = (msg, dispatch, dispatchParent) => {
   const props = msg;
   return users => {
     if (users [id]) {
-      const user = assign({}, users [id], props);
-      return assign({}, users, { [id]: user });
+      return {
+        ...users,
+        [id]: {
+          ...users [id],
+          ...props
+        }
+      };
     }
     else {
       return users;
