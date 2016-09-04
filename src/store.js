@@ -30,8 +30,7 @@ const nsShape = {
 const storeShape = {
   select: isFunction,
   dispatch: isFunction,
-  subscribe: isFunction,
-  unsubscribe: isFunction
+  subscribe: isFunction
 };
 
 const isStore = x =>
@@ -46,9 +45,6 @@ const rootStore = {
   },
   subscribe(callback) {
     return () => {};
-  },
-  unsubscribe(callback) {
-
   }
 };
 
@@ -87,8 +83,7 @@ class Store {
     this.notify = this.notify.bind(this);
     this.select = this.select.bind(this);
     this.dispatch = this.dispatch.bind(this);
-    this.subscribe = this.subscribe.bind(this);
-    this.unsubscribe = this.unsubscribe.bind(this);
+    this.subscribe = this.subscribe.bind(this)
   }
   initProps() {
     this.subscribers = new Set();
@@ -146,18 +141,19 @@ class Store {
     }
     return this;
   }
-  subscribe(callback) {
-    if (!this.subscribers.size) {
-      this.parent.subscribe(this.notify);
-    }
-    this.subscribers.add(callback);
-    return () => this.unsubscribe(callback);
-  }
   unsubscribe(callback) {
     this.subscribers.delete(callback);
     if (!this.subscribers.size) {
-      this.parent.unsubscribe(this.notify);
+      this.parentUnsubscribe();
+      this.parentUnsubscribe = null;
     }
+  }
+  subscribe(callback) {
+    if (!this.subscribers.size) {
+      this.parentUnsubscribe = this.parent.subscribe(this.notify);
+    }
+    this.subscribers.add(callback);
+    return () => this.unsubscribe(callback);
   }
 }
 
@@ -172,7 +168,6 @@ class Store {
   return {
     select: query => store.select(select(query)),
     dispatch: msg => store.dispatch(dispatch(msg)),
-    unsubscribe: store.unsubscribe,
     subscribe: store.subscribe
   };
 };*/
