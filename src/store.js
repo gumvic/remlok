@@ -2,6 +2,7 @@ import isFunction from 'lodash/isFunction';
 import conformsTo from 'lodash/conformsTo';
 import isPlainObject from 'lodash/isPlainObject';
 import pick from 'lodash/pick';
+import isUndefined from 'lodash/isUndefined';
 import promise from 'bluebird';
 import _setimmediate_ from 'setimmediate';
 
@@ -148,7 +149,28 @@ class Store {
       this.parentUnsubscribe = null;
     }
   }
-  subscribe(callback) {
+  queryCallback(query, callback) {
+    let cached = undefined;
+    const selector = this.select(query);
+    return () => {
+      const selected = selector();
+      if (selected !== cached) {
+        cached = selected;
+        callback(selected);
+      }
+    };
+  }
+  subscribe(query, callback) {
+    if (isUndefined(callback)) {
+      callback = query;
+      query = undefined;
+    }
+    if (!isFunction(callback)) {
+      throw new TypeError(`${callback} must be a function.`)
+    }
+    if (!isUndefined(query)) {
+      callback = this.queryCallback(query, callback);
+    }
     if (!this.subscribers.size) {
       this.parentUnsubscribe = this.parent.subscribe(this.notify);
     }

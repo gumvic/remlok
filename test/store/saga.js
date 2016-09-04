@@ -9,9 +9,10 @@ describe('Store', () => {
   describe('saga', () => {
     beforeEach(function() {
       const store = this.$store;
-      const selector = store.select();
-      const callback = sinon.spy(() => selector());
-      store.subscribe(callback);
+      //const selector = store.select('users');
+      //const callback = sinon.spy(() => selector());
+      const callback = sinon.spy();
+      store.subscribe('users', callback);
       this.$callback = callback;
     });
     it('optimistically updates and patches with remote data', function() {
@@ -24,20 +25,24 @@ describe('Store', () => {
       return store.dispatch(['add', user])
         .delay(10)
         .then(() => {
-          expect(callback.returnValues).to.deep.equal([
+          expect(callback.args).to.deep.equal([
             [
-              {
-                id: 'tmp',
-                name: 'Alice',
-                age: 25
-              }
+              [
+                {
+                  id: 'tmp',
+                  name: 'Alice',
+                  age: 25
+                }
+              ]
             ],
             [
-              {
-                id: 'alice',
-                name: 'Alice',
-                age: 25
-              }
+              [
+                {
+                  id: 'alice',
+                  name: 'Alice',
+                  age: 25
+                }
+              ]
             ]
           ]);
         });
@@ -52,15 +57,19 @@ describe('Store', () => {
       return store.dispatch(['add', user])
         .delay(10)
         .then(() => {
-          expect(callback.returnValues).to.deep.equal([
+          expect(callback.args).to.deep.equal([
             [
-              {
-                id: 'tmp',
-                name: 'Jill Pole',
-                age: 14
-              }
+              [
+                {
+                  id: 'tmp',
+                  name: 'Jill Pole',
+                  age: 14
+                }
+              ]
             ],
-            []
+            [
+              []
+            ]
           ]);
         });
     });

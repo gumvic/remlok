@@ -22,7 +22,9 @@ const remote = msg => {
 };
 
 const select = (query, select, selectParent) => {
-  return users => toArray(users);
+  switch(query) {
+    case 'users': return users => toArray(users);
+  }
 };
 
 const dispatch = (msg, dispatch, dispatchParent) => {
